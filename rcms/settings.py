@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3)yahk(qf6-5sb9-n+w!4dqot5u0t4*_ovk%%zwwo1raeqdg46
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'https://rcms-server-ee6cbe5d83a9.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'https://rcms-project-026e334f3d5a.herokuapp.com']
 
 
 # Application definition
