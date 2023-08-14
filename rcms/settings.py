@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-3)yahk(qf6-5sb9-n+w!4dqot5u0t4*_ovk%%zwwo1raeqdg46
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =True #bool(int(os.environ.get('DEBUG', 0)))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['rcms-project-026e334f3d5a.herokuapp.com', '*']
 ALLOWED_HOSTS.extend(
     filter(
         None,
