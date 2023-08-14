@@ -21,9 +21,11 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from rcmsapp import views
 from rcmsapp.views import ChangePasswordView
 
 urlpatterns = [
+    path('', views.index, name="index"),
     path('admin/', admin.site.urls),
     path('rcms/api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('rcms/api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

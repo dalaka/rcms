@@ -2,6 +2,7 @@ from statistics import mode
 
 from django.db import models
 from django.db.models.functions import Cast
+from django.http import HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
@@ -372,3 +373,5 @@ class ItemViews(viewsets.ModelViewSet):
         res = ConfigSerializer(config)
         return Response({"message": "updated successfullyt", "data": res.data}, status=status.HTTP_200_OK)
 
+def index(request):
+    return HttpResponse("Welcome to REVENUE COMPLIANCE MANAGEMENT Server API Page")
