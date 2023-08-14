@@ -206,7 +206,7 @@ class CompanyViews(viewsets.ModelViewSet):
         return Response({"message": "Company not found", "data":res.data}, status=status.HTTP_200_OK)
 
 class TranxViews(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = TranxSerializer
     def get_queryset(self):
         return Transaction.objects.all()
@@ -256,7 +256,7 @@ class TranxViews(viewsets.ModelViewSet):
 
 
 class ReportViews(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ReportSerializer
 
     def get_queryset(self):
@@ -309,7 +309,7 @@ class ReportViews(viewsets.ModelViewSet):
             return Response({"message": "Report not found"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ConfigViews(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ConfigSerializer
 
     def get_queryset(self):
