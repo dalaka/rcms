@@ -110,7 +110,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'HOST': "ec2-3-92-151-217.compute-1.amazonaws.com",
-        'NAME': "delhd5s2un9aaub", #"irmdb",
+        'NAME': "delhd5s2un9aau", #"irmdb",
         'USER': "euysropylfwxvc",#"admin",
         'PASSWORD': "8647123ad39143a94d770efdeeec8e72bc91577de7ebe5142270c9b953607735",
         'CONN_MAX_AGE ': None,
