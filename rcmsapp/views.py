@@ -50,8 +50,9 @@ def benchmark1(data, period,name,tin):
     total_expected = max(paymode, benchmark_2)*len(period)
     monthly_expected = max(paymode, benchmark_2)
     outstanding = total_expected - sum(pay)
-    penalty = 0.1 * abs(outstanding)
-    interest = 0.21 * abs(outstanding)
+    config = Config.objects.get(name='PAYE')
+    penalty = (config.penalty/100) * abs(outstanding)
+    interest = (config.interest/100) * abs(outstanding)
     grand_total = round(penalty,2) + round(interest,2) + abs(outstanding)
     if outstanding <=0 or monthly_expected <=0:
         month_defaulted = 0
@@ -202,9 +203,13 @@ class CompanyViews(viewsets.ModelViewSet):
         tin =request.query_params.get('tin', None)
         start = request.query_params.get('start_date', None)
         end =request.query_params.get('end_date', None)
-        company_detail= Report.objects.filter(start=start,end=end, data__in=tin)
-        res = ReportSerializer(company_detail,many=True)
-        return Response({"message": "Company not found", "data":res.data}, status=status.HTTP_200_OK)
+        company_detail= Report.objects.filter(start=start,end=end)
+        if company_detail.exists():
+            ress =[y for y in company_detail[0].data["defined"] if y["TIN"]==tin]
+
+            return Response({"message": "Company details", "data":ress}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Company details not found", "data": []}, status=status.HTTP_200_OK)
 
 class TranxViews(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -217,28 +222,28 @@ class TranxViews(viewsets.ModelViewSet):
         year=  request.query_params.get('year', None)
         month = request.query_params.get('month', None)
         tax_item = request.query_params.get('tax_item', None)
-        #try:
-        file = request.data.get('file')
-        reader = pd.read_csv(file,skipinitialspace = True)
-        reader.taxpayer_name.str.strip()
-        reader= reader.fillna('')
-        reader['tin'] = reader['tin'].astype('int64')
-        tranx_list=[]
-        tranx= Transaction.objects.filter(year=year, month=month).exists()
-        if tranx==True:
-            return Response({"status": "Transaction already existed in the database", "data": []}, status.HTTP_403_FORBIDDEN)
+        try:
+            file = request.data.get('file')
+            reader = pd.read_csv(file,skipinitialspace = True)
+            reader.taxpayer_name.str.strip()
+            reader= reader.fillna('')
+            reader['tin'] = reader['tin'].astype('int64')
+            tranx_list=[]
+            tranx= Transaction.objects.filter(year=year, month=month).exists()
+            if tranx==True:
+                return Response({"status": "Transaction already existed in the database", "data": []}, status.HTTP_403_FORBIDDEN)
 
-        for _, row in reader.iterrows():
-            tranx_list.append(dict(row))
-        res = TranxSerializer.create(self,tranx_list, year, month,tax_item)
-
-
-
-        return  Response({"status": "Data has been uploaded successfully", "data":tranx_list}, status.HTTP_201_CREATED)
+            for _, row in reader.iterrows():
+                tranx_list.append(dict(row))
+            res = TranxSerializer.create(self,tranx_list, year, month,tax_item)
 
 
-        #except:
-            #raise APIException("Invalid request data supplied, request data")
+
+            return  Response({"status": "Data has been uploaded successfully", "data":tranx_list}, status.HTTP_201_CREATED)
+
+
+        except:
+            raise APIException("Invalid request data supplied, request data")
 
     @action(detail=False, methods=['DELETE'])
     def bulk_delete(self, request, *args, **kwargs):

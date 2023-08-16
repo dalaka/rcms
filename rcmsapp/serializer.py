@@ -53,7 +53,7 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ('id','name', 'tin', 'address')
 
     def create(self, validated_data):
-        print(validated_data)
+
         for i in validated_data:
             Company.objects.create(name=i["taxpayer_name"].upper(),tin=i["tin"], address=i["address"])
         return True
@@ -66,7 +66,7 @@ class TranxSerializer(serializers.ModelSerializer):
         fields = ('id','tax_item', 'month', 'year','taxpayer_name','amount_paid','tin')
 
     def create(self, validated_data,year,month,item):
-        print(validated_data)
+
         for i in validated_data:
             res=Transaction.objects.create(tin=i["tin"],amount_paid=i["amount_paid"],taxpayer_name=i["taxpayer_name"].upper(),tax_item=item,month=month, year=year)
         return res
