@@ -111,10 +111,10 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': "ec2-3-92-151-217.compute-1.amazonaws.com",
-        'NAME': "delhd5s2un9aau", #"irmdb",
-        'USER': "euysropylfwxvc",#"admin",
-        'PASSWORD': "8647123ad39143a94d770efdeeec8e72bc91577de7ebe5142270c9b953607735",
+        'HOST': "ec2-44-215-40-87.compute-1.amazonaws.com",
+        'NAME': "d54qtocgkcqhq6", #"irmdb",
+        'USER': "yrexcfavfshawx",#"admin",
+        'PASSWORD': "539ac1f3af4ec4479044e48bf707f65e9663598bb75d7ec264fb3b972379e772",
         'CONN_MAX_AGE ': None,
         'PORT': "5432",
     }
