@@ -289,7 +289,8 @@ class ReportViews(viewsets.ModelViewSet):
         undefined = []
 
         #date=request.query_params.get('date', None)
-
+        if Transaction.objects.filter(year=dt.year, tax_item =item_object.name).exists() == False:
+            return Response({"message":"No transaction data"}, status=status.HTTP_404_NOT_FOUND)
         payers = Company.objects.all()
         for payer in payers:
             res= Transaction.objects.filter(taxpayer_name__contains=payer.name, tax_item__contains=item_object.name, year=str(dt.year))
