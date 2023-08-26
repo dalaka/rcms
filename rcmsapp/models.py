@@ -82,6 +82,7 @@ class Item(models.Model):
         return self.name
 
 class Report(models.Model):
+    year = models.CharField(max_length=255, blank=True)
     start = models.CharField(max_length=255, blank=True)
     end  = models.CharField(max_length=255, blank=True)
     item = models.ForeignKey(Item, on_delete=models.PROTECT,related_name="report_item")

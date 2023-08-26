@@ -23,6 +23,8 @@ from django.db.models import Q, F
 
 
 def benchmark1(data, period,name,tin):
+    m={}
+    m_list = []
     pay = []
     freq=[]
     a=0
@@ -32,8 +34,13 @@ def benchmark1(data, period,name,tin):
             for i in res:
                 pay.append(i.amount_paid)
                 a +=1
-
             freq.append(a)
+        m[p]=a
+
+    m_list.append(m)
+
+
+
 
 
     if len(pay)==0 or len(freq)==0:
@@ -64,8 +71,8 @@ def benchmark1(data, period,name,tin):
         status="Has Outstanding"
     else:
         status ="Not-Complied"
-    result = {"Status":status, "month_defaulted":round(month_defaulted,1),"outstanding":round(outstanding,2),"monthly_expected":round(monthly_expected,2),"total_expected":round(total_expected,2),"TIN":tin,"payer":name,"benchmark_1": paymode, "benchmark_2":benchmark_2,"total_actual": sum(pay),\
-              "frequent_entry":mode2,"total_entry":sum(freq),"interest":round(interest,2), "penalty": round(penalty,2), "grand_total_liability": abs(grand_total) }
+    result = {"months":m_list,"Status":status, "month_defaulted":round(month_defaulted,1),"outstanding":round(outstanding,2),"monthly_expected":round(monthly_expected,2),"total_expected":round(total_expected,2),"TIN":tin,"payer":name,"benchmark_1": paymode, "benchmark_2":benchmark_2,"total_actual": sum(pay),\
+              "frequent_entry":mode2,"total_entry":sum(freq),"interest":round(interest,2), "penalty": round(penalty,2), "grand_total_liability": round(abs(grand_total),2)}
 
     return result
 
@@ -282,6 +289,7 @@ class ReportViews(viewsets.ModelViewSet):
         undefined = []
 
         #date=request.query_params.get('date', None)
+
         payers = Company.objects.all()
         for payer in payers:
             res= Transaction.objects.filter(taxpayer_name__contains=payer.name, tax_item__contains=item_object.name, year=str(dt.year))
@@ -293,12 +301,24 @@ class ReportViews(viewsets.ModelViewSet):
 
         finals = final(pay_load)
         data={"defined":pay_load, "undefined":undefined}
+        if Report.objects.filter(item_id=tax_item, year=dt.year).exists():
+            new =Report.objects.get(year=dt.year, item_id=tax_item)
+            new.start=start_date
+            new.end = end_date
+            new.total_compiled_organisaction=finals["total_complied"]
+            new.total_defaulted_organisaction =finals["total_defaulted"]
+            new.total_liability=finals["total_liability"]
+            new.data = data
+            new.save()
 
-        ress=Report.objects.create(start=start_date,end=end_date,item_id=tax_item,total_compiled_organisaction=finals["total_complied"], total_defaulted_organisaction=finals["total_defaulted"],total_liability=finals["total_liability"],data=data)
+            trnx= ReportSerializer(new)
+            return Response({"message": "report", "data": trnx.data}, status=status.HTTP_200_OK)
+        else:
+            ress=Report.objects.create(start=start_date,year=dt.year,end=end_date,item_id=tax_item,total_compiled_organisaction=finals["total_complied"], total_defaulted_organisaction=finals["total_defaulted"],total_liability=finals["total_liability"],data=data)
 
 
-        trnx= ReportSerializer(ress)
-        return Response({"message": "report", "data": trnx.data}, status=status.HTTP_200_OK)
+            trnx= ReportSerializer(ress)
+            return Response({"message": "report", "data": trnx.data}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['DELETE'])
     def bulk_delete(self, request, *args, **kwargs):
@@ -313,6 +333,44 @@ class ReportViews(viewsets.ModelViewSet):
             return Response({"message":"The report data deleted successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Report not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'])
+    def dashboard_stat(self, request, *args, **kwargs):
+        year = request.query_params.get('year', None)
+        data = []
+
+        defl =0
+        compls = 0
+        liability=0
+        total_gen =0
+        total_lib =0
+        report= Report.objects.filter(year=year, item_id=1)
+        if report.exists():
+            dt=report[0]
+            month_list = pd.period_range(start=dt.start, end=dt.end, freq='M')
+            month_list = [month.strftime("%m") for month in month_list]
+            total_complied_org=dt.total_compiled_organisaction
+            total_defaulted_org = dt.total_defaulted_organisaction
+            total_lib = dt.total_liability
+            res=dt.data["defined"]
+            for i in month_list:
+                for d in res:
+                    total_gen += d["total_actual"]
+                    f=d["months"][0]
+                    if f[i]>0:
+                        compls+=1
+                    else:
+                        defl +=1
+                        liability += d["grand_total_liability"]
+
+                    ress = {"month":i, "complied_org": compls, "default_org": defl, "total_liability":liability}
+                liability =0
+                defl=0
+                compls=0
+                data.append(ress)
+        r_dict= {"total_complied_org":total_complied_org,"total_defaulted_org": total_defaulted_org,"total_liability":total_lib, "total_generated":round(total_gen,2), "data":data }
+
+        return Response({"message": "dashboard", "result":r_dict}, status=status.HTTP_200_OK)
 
 class ConfigViews(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
