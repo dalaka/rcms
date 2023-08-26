@@ -290,7 +290,7 @@ class ReportViews(viewsets.ModelViewSet):
 
         #date=request.query_params.get('date', None)
         if Transaction.objects.filter(year=dt.year, tax_item =item_object.name).exists() == False:
-            return Response({"message":"No transaction data"}, status=status.HTTP_404_NOT_FOUND)
+            return  Response({"message":"No transaction data"}, status=status.HTTP_404_NOT_FOUND)
         payers = Company.objects.all()
         for payer in payers:
             res= Transaction.objects.filter(taxpayer_name__contains=payer.name, tax_item__contains=item_object.name, year=str(dt.year))
@@ -323,13 +323,13 @@ class ReportViews(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['DELETE'])
     def bulk_delete(self, request, *args, **kwargs):
-        month =request.query_params.get('start_date', None)
-        year =request.query_params.get('end_date', None)
+        start =request.query_params.get('start_date', None)
+        end =request.query_params.get('end_date', None)
         tax_item = request.query_params.get('item_id', None)
 
-        if month == None or year==None:
+        if start == None or end==None:
             return Response({"message": "You must write the right date"}, status=status.HTTP_400_BAD_REQUEST)
-        res=Report.objects.filter(start=month,end=year,item_id=tax_item).delete()
+        res=Report.objects.filter(start=start,end=end,item_id__id=tax_item).delete()
         if res:
             return Response({"message":"The report data deleted successfully"}, status=status.HTTP_200_OK)
         else:
@@ -345,6 +345,7 @@ class ReportViews(viewsets.ModelViewSet):
         liability=0
         total_gen =0
         total_lib =0
+        ress=None
         report= Report.objects.filter(year=year, item_id=1)
         if report.exists():
             dt=report[0]
@@ -364,14 +365,17 @@ class ReportViews(viewsets.ModelViewSet):
                         defl +=1
                         liability += d["grand_total_liability"]
 
-                    ress = {"month":i, "complied_org": compls, "default_org": defl, "total_liability":liability}
+                ress = {"month":i, "complied_org": compls, "default_org": defl, "total_liability":liability}
                 liability =0
                 defl=0
                 compls=0
                 data.append(ress)
-        r_dict= {"total_complied_org":total_complied_org,"total_defaulted_org": total_defaulted_org,"total_liability":total_lib, "total_generated":round(total_gen,2), "data":data }
+            r_dict= {"total_complied_org":total_complied_org,"total_defaulted_org": total_defaulted_org,"total_liability":total_lib, "total_generated":round(total_gen,2), "data":data }
 
-        return Response({"message": "dashboard", "result":r_dict}, status=status.HTTP_200_OK)
+            return Response({"message": "dashboard", "result":r_dict}, status=status.HTTP_200_OK)
+        else:
+            r_dict = {"total_complied_org": 0, "total_defaulted_org": 0,"total_liability": 0, "total_generated":0, "data": []}
+            return Response({"message": "No records", "result": r_dict}, status=status.HTTP_200_OK)
 
 class ConfigViews(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
