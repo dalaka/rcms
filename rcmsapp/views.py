@@ -434,12 +434,11 @@ class ItemViews(viewsets.ModelViewSet):
 
 
     def update(self, request, *args, **kwargs):
-        config = self.get_object()
-        config.penalty = request.data.get('penalty', config.penalty)
-        config.interest = request.data.get('interest', config.interest)
-        config.save()
-        res = ConfigSerializer(config)
-        return Response({"message": "updated successfullyt", "data": res.data}, status=status.HTTP_200_OK)
+        item = self.get_object()
+        item.name= request.data.get('name', item.name)
+        item.save()
+        res = ItemSerializer(item)
+        return Response({"message": "updated successfully", "data": res.data}, status=status.HTTP_200_OK)
 
 def index(request):
     return HttpResponse("Welcome to REVENUE COMPLIANCE MANAGEMENT Server API Page")
