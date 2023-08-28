@@ -36,6 +36,7 @@ def benchmark1(data, period,name,tin):
                 a +=1
             freq.append(a)
         m[p]=a
+        a=0
 
     m_list.append(m)
 
@@ -359,13 +360,14 @@ class ReportViews(viewsets.ModelViewSet):
                 for d in res:
                     total_gen += d["total_actual"]
                     f=d["months"][0]
+                    print(f)
                     if f[i]>0:
                         compls+=1
                     else:
                         defl +=1
-                        liability += d["grand_total_liability"]
+                        liability += d["monthly_expected"]
 
-                ress = {"month":i, "complied_org": compls, "default_org": defl, "total_liability":liability}
+                ress = {"month":i, "complied_org": compls, "default_org": defl, "total_liability":round(liability,2)}
                 liability =0
                 defl=0
                 compls=0
