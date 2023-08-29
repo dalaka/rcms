@@ -102,7 +102,9 @@ AUTH_USER_MODEL = 'rcmsapp.User'
 WSGI_APPLICATION = 'rcms.wsgi.application'
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "TOKEN_OBTAIN_SERIALIZER": "rcmsapp.serializer.MyTokenObtainPairSerializer",
+
 }
 
 # Database

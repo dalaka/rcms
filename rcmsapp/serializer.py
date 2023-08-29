@@ -3,7 +3,19 @@ from rest_framework import serializers
 
 from rcmsapp.models import User, Company, Transaction, Config, Item, Report
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['role'] = user.role
+
+
+        return token
 def createuser(data):
     password = data['password']
     user = User.objects.create(first_name=data['first_name'], last_name=data['last_name'],username=data['username'],

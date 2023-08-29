@@ -12,6 +12,7 @@ import datetime
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 import pandas as pd
@@ -156,7 +157,18 @@ class CompanyViews(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Company.objects.all()
+    def list(self, request, *args, **kwargs):
 
+        search = request.query_params.get('search', None)
+        paginator = PageNumberPagination()
+        if search != None:
+            get_allprt= Company.objects.filter(Q(tin__icontains=search)| Q(created_at__year__icontains=search))
+        else:
+            get_allprt = Company.objects.all()
+        res=paginator.paginate_queryset(get_allprt,request,view=None)
+        serial=CompanySerializer(res,many=True)
+
+        return paginator.get_paginated_response(serial.data)
     def create(self, request, *args, **kwargs):
 
         try:
@@ -225,6 +237,22 @@ class TranxViews(viewsets.ModelViewSet):
     def get_queryset(self):
         return Transaction.objects.all()
 
+
+
+
+    def list(self, request, *args, **kwargs):
+
+        year = request.query_params.get('year',)
+        month = request.query_params.get('month', None)
+        paginator = PageNumberPagination()
+        if year and month != None:
+            get_allprt= Transaction.objects.filter(Q(month=month) and Q(year=year))
+        else:
+            get_allprt = Transaction.objects.all()
+        res=paginator.paginate_queryset(get_allprt,request,view=None)
+        serial=TranxSerializer(res,many=True)
+        return paginator.get_paginated_response(serial.data)
+
     def create(self, request, *args, **kwargs):
 
         year=  request.query_params.get('year', None)
@@ -288,6 +316,9 @@ class ReportViews(viewsets.ModelViewSet):
         month_list = [month.strftime("%m") for month in month_list]
         pay_load = []
         undefined = []
+        dts = datetime.datetime.strptime(end_date, '%Y-%m')
+        if dt.year != dts.year:
+            return Response({"message": "Date range most be within a year"}, status=status.HTTP_404_NOT_FOUND)
 
         #date=request.query_params.get('date', None)
         if Transaction.objects.filter(year=dt.year, tax_item =item_object.name).exists() == False:
