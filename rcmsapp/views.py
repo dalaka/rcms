@@ -109,8 +109,20 @@ class UserView(viewsets.ModelViewSet):
         is_active = request.query_params.get('is_active',None)
 
         paginator = PageNumberPagination()
-        if search or role or is_active != None:
-            get_allprt= User.objects.filter(Q(is_active__exact=is_active) | Q(role__contains=role) | Q(email__contains=search) | Q(first_name__icontains=search))
+        if search != None and role !=None and is_active != None:
+            get_allprt= User.objects.filter(Q(is_active__exact=is_active) & Q(role__contains=role) & Q(email__contains=search) | Q(first_name__icontains=search))
+        elif search != None and role ==None and is_active == None:
+            get_allprt= User.objects.filter( Q(email__contains=search) | Q(first_name__icontains=search))
+        elif search != None and role ==None and is_active != None:
+            get_allprt= User.objects.filter( Q(is_active__exact=is_active)& Q(email__contains=search) | Q(first_name__icontains=search))
+        elif search != None and role !=None and is_active == None:
+            get_allprt= User.objects.filter( Q(role__exact=is_active)& Q(email__contains=search) | Q(first_name__icontains=search))
+        elif search == None and role ==None and is_active != None:
+            get_allprt= User.objects.filter( Q(is_active__exact=is_active))
+        elif search == None and role !=None and is_active == None:
+            get_allprt= User.objects.filter( Q(role__exact=role))
+        elif search == None and role !=None and is_active != None:
+            get_allprt= User.objects.filter( Q(role__exact=role)& Q(is_active__exact=is_active))
         else:
             get_allprt = User.objects.all()
         res=paginator.paginate_queryset(get_allprt,request,view=None)
