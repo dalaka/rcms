@@ -176,8 +176,12 @@ class CompanyViews(viewsets.ModelViewSet):
         search = request.query_params.get('search', None)
         year = request.query_params.get('year',None)
         paginator = PageNumberPagination()
-        if search or year != None:
-            get_allprt= Company.objects.filter(Q(tin__icontains=search)| Q(name__icontains=search) | Q(created_at__year__icontains=year))
+        if search and year != None:
+            get_allprt= Company.objects.filter(Q(tin__icontains=search) | Q(name__icontains=search) & Q(created_at__year__icontains=year))
+        elif search != None and year==None:
+            get_allprt= Company.objects.filter(Q(tin__icontains=search) & Q(name__icontains=search))
+        elif search == None and year !=None:
+            get_allprt= Company.objects.filter(created_at__year__icontains=year)
         else:
             get_allprt = Company.objects.all()
         res=paginator.paginate_queryset(get_allprt,request,view=None)
