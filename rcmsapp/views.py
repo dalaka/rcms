@@ -102,6 +102,20 @@ class UserView(viewsets.ModelViewSet):
     def get_queryset(self):
         obj = User.objects.all()
         return obj
+    def list(self, request, *args, **kwargs):
+
+        search = request.query_params.get('search', None)
+        role = request.query_params.get('role',None)
+        is_active = request.query_params.get('is_active',None)
+
+        paginator = PageNumberPagination()
+        if search or role or is_active != None:
+            get_allprt= User.objects.filter(Q(is_active__exact=is_active) | Q(role__contains=role) | Q(email__contains=search) | Q(first_name__icontains=search))
+        else:
+            get_allprt = User.objects.all()
+        res=paginator.paginate_queryset(get_allprt,request,view=None)
+        serial=UserSerializer(res,many=True)
+        return paginator.get_paginated_response(serial.data)
 
     def create(self, request, *args, **kwargs):
 
@@ -160,9 +174,10 @@ class CompanyViews(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
 
         search = request.query_params.get('search', None)
+        year = request.query_params.get('year',None)
         paginator = PageNumberPagination()
-        if search != None:
-            get_allprt= Company.objects.filter(Q(tin__icontains=search)| Q(created_at__year__icontains=search))
+        if search or year != None:
+            get_allprt= Company.objects.filter(Q(tin__icontains=search)| Q(name__icontains=search) | Q(created_at__year__icontains=year))
         else:
             get_allprt = Company.objects.all()
         res=paginator.paginate_queryset(get_allprt,request,view=None)
@@ -242,11 +257,12 @@ class TranxViews(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
 
-        year = request.query_params.get('year',)
+        year = request.query_params.get('year',None)
+        search = request.query_params.get('search', None)
         month = request.query_params.get('month', None)
         paginator = PageNumberPagination()
-        if year and month != None:
-            get_allprt= Transaction.objects.filter(Q(month=month) and Q(year=year))
+        if year or month or search != None:
+            get_allprt= Transaction.objects.filter(Q(month=month) & Q(year=year) | Q(taxpayer_name__contains=search))
         else:
             get_allprt = Transaction.objects.all()
         res=paginator.paginate_queryset(get_allprt,request,view=None)
@@ -464,7 +480,18 @@ class ItemViews(viewsets.ModelViewSet):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+    def list(self, request, *args, **kwargs):
 
+        search = request.query_params.get('search', None)
+        paginator = PageNumberPagination()
+        if search != None:
+            get_allprt= Item.objects.filter(Q(name__icontains=search))
+        else:
+            get_allprt = Item.objects.all()
+        res=paginator.paginate_queryset(get_allprt,request,view=None)
+        serial=ItemSerializer(res,many=True)
+
+        return paginator.get_paginated_response(serial.data)
 
     def update(self, request, *args, **kwargs):
         item = self.get_object()
