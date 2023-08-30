@@ -265,9 +265,19 @@ class TranxViews(viewsets.ModelViewSet):
         search = request.query_params.get('search', None)
         month = request.query_params.get('month', None)
         paginator = PageNumberPagination()
-        if year or month or search != None:
-            get_allprt= Transaction.objects.filter(Q(month=month) & Q(year=year) | Q(taxpayer_name__contains=search))
+
+        if year !=None and month !=None and search != None:
+
+            get_allprt= Transaction.objects.filter(Q(month__contains=month) & Q(year__contains=year) & Q(taxpayer_name__contains=search))
+        elif year ==None and month ==None and search != None:
+
+            get_allprt = Transaction.objects.filter(taxpayer_name__contains=search)
+        elif year !=None and month !=None and search == None:
+            get_allprt = Transaction.objects.filter(Q(year__contains=year)  & Q(month__contains=month) )
+        elif year !=None and month ==None and search == None:
+            get_allprt = Transaction.objects.filter(Q(year__contains=year) )
         else:
+
             get_allprt = Transaction.objects.all()
         res=paginator.paginate_queryset(get_allprt,request,view=None)
         serial=TranxSerializer(res,many=True)
