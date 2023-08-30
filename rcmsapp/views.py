@@ -453,6 +453,20 @@ class ReportViews(viewsets.ModelViewSet):
             r_dict = {"total_complied_org": 0, "total_defaulted_org": 0,"total_liability": 0, "total_generated":0, "data": []}
             return Response({"message": "No records", "result": r_dict}, status=status.HTTP_200_OK)
 
+    def list(self, request, *args, **kwargs):
+
+
+        year = request.query_params.get('year',None)
+        paginator = PageNumberPagination()
+        if  year != None:
+            get_allprt= Report.objects.filter(year=year )
+
+        else:
+            get_allprt = Report.objects.all()
+        res=paginator.paginate_queryset(get_allprt,request,view=None)
+        serial=ReportSerializer(res,many=True)
+
+        return paginator.get_paginated_response(serial.data)
 class ConfigViews(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ConfigSerializer
