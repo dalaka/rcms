@@ -120,6 +120,7 @@ class UserView(viewsets.ModelViewSet):
         elif search == None and role ==None and is_active != None:
             get_allprt= User.objects.filter( Q(is_active__exact=is_active))
         elif search == None and role !=None and is_active == None:
+
             get_allprt= User.objects.filter( Q(role__exact=role))
         elif search == None and role !=None and is_active != None:
             get_allprt= User.objects.filter( Q(role__exact=role)& Q(is_active__exact=is_active))
