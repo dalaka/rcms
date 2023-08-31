@@ -110,13 +110,13 @@ class UserView(viewsets.ModelViewSet):
 
         paginator = PageNumberPagination()
         if search != None and role !=None and is_active != None:
-            get_allprt= User.objects.filter(Q(is_active__exact=is_active) & Q(role__contains=role) & Q(email__contains=search) | Q(first_name__icontains=search))
+            get_allprt= User.objects.filter(Q(is_active__exact=is_active) & Q(role__icontains=role) & Q(email__icontains=search) | Q(first_name__icontains=search))
         elif search != None and role ==None and is_active == None:
             get_allprt= User.objects.filter( Q(email__contains=search) | Q(first_name__icontains=search))
         elif search != None and role ==None and is_active != None:
-            get_allprt= User.objects.filter( Q(is_active__exact=is_active)& Q(email__contains=search) | Q(first_name__icontains=search))
+            get_allprt= User.objects.filter( Q(is_active__exact=is_active)& Q(email__icontains=search) | Q(first_name__icontains=search))
         elif search != None and role !=None and is_active == None:
-            get_allprt= User.objects.filter( Q(role__exact=is_active)& Q(email__contains=search) | Q(first_name__icontains=search))
+            get_allprt= User.objects.filter( Q(role__exact=is_active)& Q(email__icontains=search) | Q(first_name__icontains=search))
         elif search == None and role ==None and is_active != None:
             get_allprt= User.objects.filter( Q(is_active__exact=is_active))
         elif search == None and role !=None and is_active == None:
@@ -281,12 +281,12 @@ class TranxViews(viewsets.ModelViewSet):
 
         if year !=None and month !=None and search != None:
 
-            get_allprt= Transaction.objects.filter(Q(month__contains=month) & Q(year__contains=year) & Q(taxpayer_name__contains=search))
+            get_allprt= Transaction.objects.filter(Q(month__contains=month) & Q(year__contains=year) & Q(taxpayer_name__icontains=search)| Q(tax_item__icontains=search) | Q(tin__icontains=search))
         elif year ==None and month ==None and search != None:
 
-            get_allprt = Transaction.objects.filter(taxpayer_name__contains=search)
+            get_allprt = Transaction.objects.filter(Q(taxpayer_name__icontains=search) | Q(tax_item__icontains=search) | Q(tin__icontains=search))
         elif year !=None and month !=None and search == None:
-            get_allprt = Transaction.objects.filter(Q(year__contains=year)  & Q(month__contains=month) )
+            get_allprt = Transaction.objects.filter(Q(year__contains=year) & Q(month__contains=month) )
         elif year !=None and month ==None and search == None:
             get_allprt = Transaction.objects.filter(Q(year__contains=year) )
         else:
