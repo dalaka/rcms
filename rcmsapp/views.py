@@ -289,6 +289,8 @@ class TranxViews(viewsets.ModelViewSet):
             get_allprt = Transaction.objects.filter(Q(year__contains=year) & Q(month__contains=month) )
         elif year !=None and month ==None and search == None:
             get_allprt = Transaction.objects.filter(Q(year__contains=year) )
+        elif year !=None and month ==None and search != None:
+            get_allprt = Transaction.objects.filter(Q(year__contains=year) & Q(taxpayer_name__icontains=search)| Q(tax_item__icontains=search) | Q(tin__icontains=search) )
         else:
 
             get_allprt = Transaction.objects.all()
