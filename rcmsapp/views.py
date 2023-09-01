@@ -165,12 +165,33 @@ class UserView(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         user= self.get_object()
-
+        if self.request.user.is_superuser !=True:
+            return Response({"message": "You are not a super user"}, status=status.HTTP_403_FORBIDDEN)
+        if user.is_superuser ==True:
+            return Response({"message": "You can not delete a super user"}, status=status.HTTP_403_FORBIDDEN)
         if user:
             user.delete()
             return Response({"message":"The user deleted successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['POST'])
+    def change_userpwd(self, request, *args, **kwargs):
+        username =request.query_params.get('username', None)
+        email = request.query_params.get('email', None)
+
+        user_detail= User.objects.filter(username=username,email=email)
+        if self.request.user.is_superuser !=True:
+            return Response({"message": "You are not a superuser", "data": []}, status=status.HTTP_403_FORBIDDEN)
+
+        if user_detail.exists():
+            usr=user_detail[0]
+            usr.set_password(request.data["new_password"])
+            usr.save()
+
+            return Response({"message": "Password changed successfully", "data":[]}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "user not found", "data": []}, status=status.HTTP_404_NOT_FOUND)
 
 class ChangePasswordView(generics.UpdateAPIView):
     queryset = User.objects.all()
@@ -309,6 +330,7 @@ class TranxViews(viewsets.ModelViewSet):
             reader.taxpayer_name.str.strip()
             reader= reader.fillna('')
             reader['tin'] = reader['tin'].astype('int64')
+            #reader['amount_paid'] = reader['amount_paid'].astype('float')
             tranx_list=[]
             tranx= Transaction.objects.filter(year=year, month=month).exists()
             if tranx==True:
