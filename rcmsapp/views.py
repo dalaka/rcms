@@ -72,7 +72,7 @@ def benchmark1(data, period,name,tin):
     elif month_defaulted >0:
         status="Has Outstanding"
     else:
-        status ="Not-Complied"
+        status ="No Payment"
     result = {"months":m_list,"Status":status, "month_defaulted":round(month_defaulted,1),"outstanding":round(outstanding,2),"monthly_expected":round(monthly_expected,2),"total_expected":round(total_expected,2),"TIN":tin,"payer":name,"benchmark_1": paymode, "benchmark_2":benchmark_2,"total_actual": sum(pay),\
               "frequent_entry":mode2,"total_entry":sum(freq),"interest":round(interest,2), "penalty": round(penalty,2), "grand_total_liability": round(abs(grand_total),2)}
 
