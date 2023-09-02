@@ -65,6 +65,7 @@ def benchmark1(data, period,name,tin):
     grand_total = round(penalty,2) + round(interest,2) + abs(outstanding)
     if outstanding <=0 or monthly_expected <=0:
         month_defaulted = 0
+        outstanding = 0
     else:
         month_defaulted = outstanding/monthly_expected
     if month_defaulted ==0 and sum(pay) > 0:
