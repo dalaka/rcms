@@ -13,6 +13,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add custom claims
         token['role'] = user.role
+        token['is_superuser'] = user.is_superuser
 
 
         return token
@@ -47,6 +48,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
     def validate_old_password(self, value):
         user = self.context['request'].user
+        print(value)
         if not user.check_password(value):
             raise serializers.ValidationError({"detail": "Old password is not correct"})
         return value
